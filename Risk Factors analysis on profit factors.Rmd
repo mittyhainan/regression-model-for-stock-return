@@ -1,0 +1,955 @@
+---
+title: "Risk Factors analysis on profit factors"
+author: "Hainan Xiong"
+date: "8/31/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+## get the link tools 
+```{r}
+link_variables = read.csv("link_variables.csv")
+#View(link_variables)
+```
+## get the quarterly financial data 
+```{r}
+financial_data = read.csv("financial data.csv")
+#difference = financial_data$acomincq - financial_data$cogsq
+#financial_data = cbind(financial_data,difference)
+#View(financial_data)
+```
+## get the time_series return 
+```{r}
+return_series = read.csv("return series.csv")
+#View(return_series)
+```
+
+## preprocess data
+```{r}
+sapply(return_series,class)
+sapply(financial_data,class)
+```
+## preprocess
+```{r}
+return_series[return_series == 20070330] = 20070331
+return_series[return_series == 20070629] = 20070630
+return_series[return_series == 20070928] = 20070930
+return_series[return_series == 20080530] = 20080531
+return_series[return_series == 20080829] = 20080831
+return_series[return_series == 20081128] = 20081130
+return_series[return_series == 20090130] = 20090131
+return_series[return_series == 20090227] = 20090228
+return_series[return_series == 20090529] = 20090531
+return_series[return_series == 20091030] = 20091031
+return_series[return_series == 20100129] = 20100131
+return_series[return_series == 20100226] = 20100228
+return_series[return_series == 20100528] = 20100531
+return_series[return_series == 20100730] = 20100731
+return_series[return_series == 20101029] = 20101031
+return_series[return_series == 20110429] = 20110430
+return_series[return_series == 20110729] = 20110731
+return_series[return_series == 20111230] = 20111231
+return_series[return_series == 20120330] = 20120331
+return_series[return_series == 20120629] = 20120630
+return_series[return_series == 20120928] = 20120930
+return_series[return_series == 20130328] = 20130331
+return_series[return_series == 20130628] = 20130630
+return_series[return_series == 20130830] = 20130831
+return_series[return_series == 20131129] = 20131130
+return_series[return_series == 20140530] = 20140531
+return_series[return_series == 20140829] = 20140831
+return_series[return_series == 20141128] = 20141130
+return_series[return_series == 20150130] = 20150131
+return_series[return_series == 20150227] = 20150228
+return_series[return_series == 20150529] = 20150531
+return_series[return_series == 20151030] = 20151031
+return_series[return_series == 20160129] = 20160131
+return_series[return_series == 20160429] = 20160430
+return_series[return_series == 20160729] = 20160731
+return_series[return_series == 20161230] = 20161231
+return_series[return_series == 20170428] = 20170430
+return_series[return_series == 20170929] = 20170930
+return_series[return_series == 20171129] = 20171130
+return_series[return_series == 20171229] = 20171231
+return_series[return_series == 20180329] = 20180331
+return_series[return_series == 20180629] = 20180630
+return_series[return_series == 20180928] = 20180930
+return_series[return_series == 20190329] = 20190331
+return_series[return_series == 20190628] = 20190630
+return_series[return_series == 20190830] = 20190831
+return_series[return_series == 20191129] = 20191130
+```
+
+```{r}
+time_series[time_series == 20070330] = 20070331
+time_series[time_series == 20070629] = 20070630
+time_series[time_series == 20070928] = 20070930
+time_series[time_series == 20080530] = 20080531
+time_series[time_series == 20080829] = 20080831
+time_series[time_series == 20081128] = 20081130
+time_series[time_series == 20090130] = 20090131
+time_series[time_series == 20090227] = 20090228
+time_series[time_series == 20090529] = 20090531
+time_series[time_series == 20091030] = 20091031
+time_series[time_series == 20100129] = 20100131
+time_series[time_series == 20100226] = 20100228
+time_series[time_series == 20100528] = 20100531
+time_series[time_series == 20100730] = 20100731
+time_series[time_series == 20101029] = 20101031
+time_series[time_series == 20110429] = 20110430
+time_series[time_series == 20110729] = 20110731
+time_series[time_series == 20111230] = 20111231
+time_series[time_series == 20120330] = 20120331
+time_series[time_series == 20120629] = 20120630
+time_series[time_series == 20120928] = 20120930
+time_series[time_series == 20130328] = 20130331
+time_series[time_series == 20130628] = 20130630
+time_series[time_series == 20130830] = 20130831
+time_series[time_series == 20131129] = 20131130
+time_series[time_series == 20140530] = 20140531
+time_series[time_series == 20140829] = 20140831
+time_series[time_series == 20141128] = 20141130
+time_series[time_series == 20150130] = 20150131
+time_series[time_series == 20150227] = 20150228
+time_series[time_series == 20150529] = 20150531
+time_series[time_series == 20151030] = 20151031
+time_series[time_series == 20160129] = 20160131
+time_series[time_series == 20160429] = 20160430
+time_series[time_series == 20160729] = 20160731
+time_series[time_series == 20161230] = 20161231
+time_series[time_series == 20170428] = 20170430
+time_series[time_series == 20170929] = 20170930
+time_series[time_series == 20171129] = 20171130
+time_series[time_series == 20171229] = 20171231
+time_series[time_series == 20180329] = 20180331
+time_series[time_series == 20180629] = 20180630
+time_series[time_series == 20180928] = 20180930
+time_series[time_series == 20190329] = 20190331
+time_series[time_series == 20190628] = 20190630
+time_series[time_series == 20190830] = 20190831
+time_series[time_series == 20191129] = 20191130
+```
+```{r}
+time_series = time_series[1:156]
+time_series
+```
+
+## Acomnicq
+
+## 20070131
+```{r}
+return_series$RET = as.numeric(as.character(return_series$RET))
+return_series = na.omit(return_series)
+return_20070228 = return_series %>% filter(date == 20070228)
+return_20070228
+financial_20070131 = financial_data %>% filter(datadate == 20070131)
+financial_20070131 = financial_20070131[order(financial_20070131$LPERMNO),]
+financial_20070131
+```
+```{r}
+sapply(financial_20070131,class)
+sapply(return_20070228,class)
+```
+
+```{r}
+factor_list = c()
+future_return_list = c()
+for(i in 1:length(financial_20070131$LPERMNO)){
+      if(financial_20070131$LPERMNO[i] %in% return_20070228$PERMNO){
+        pos = match(financial_20070131$LPERMNO[i],return_20070228$PERMNO)
+        factor_list = c(factor_list,financial_20070131$acomincq[i])
+        future_return_list = c(future_return_list,return_20070228$RET[pos])
+      }
+  
+}
+factor_list
+future_return_list
+```
+
+```{r}
+model = data.frame(x = factor_list, y = future_return_list)
+linear_mod = lm(y~x,data = model)
+coeff1 = linear_mod$coefficients
+```
+
+```{r}
+time_series
+```
+
+
+## fama_macbeth regression on acomnic
+```{r}
+coeff_list = c()
+coeff_list = c(coeff_list,coeff1)
+for(i in 2:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$acomincq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(6,length(coeff_list),6)
+coeff_list = coeff_list[toDelete]
+t.test(coeff_list,alternative = "greater")
+```
+
+## fama_macbeth on cogsq
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$cogsq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_list = coeff_list[-toDelete]
+t.test(coeff_list,alternative = "two.sided")
+```
+
+
+
+## fama_macbeth on income before extraordinary items
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$ibq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_series = coeff_list[-toDelete]
+t.test(coeff_series,alternative = "greater")
+```
+positively correlative
+```{r}
+beta = mean(coeff_series)
+to_delete = seq(2,length(coeff_list),2)
+intercept_list = coeff_list[-to_delete]
+intercept = mean(intercept_list)
+```
+```{r}
+beta
+intercept
+```
+
+```{r}
+return_list = c()
+RSS = 0
+for(i in 1:155){
+  next_return = return_series %>% filter(date == time_series[i+1])
+  current_data = financial_data %>% filter(datadate == time_series[i])
+  ticker_list = c()
+  true_return = c()
+  predicted_return = c()
+  for(j in 1:length(current_data$LPERMNO)){
+    if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+      index = match(current_data$LPERMNO[j],next_return$PERMNO)
+      ticker_list = c(ticker_list,current_data$ibq[j])
+      true_return = c(true_return,next_return$RET[index])
+      predicted_value = current_data$ibq[j]*beta + intercept
+      predicted_return = c(predicted_return,predicted_value)
+      if(!is.na(predicted_value)){
+        RSS = RSS + abs((predicted_value^2 - (next_return$RET[index])^2))
+      }
+    }
+  }
+  df = cbind(ticker_list,predicted_return,true_return)
+  df = data.frame(x = df)
+  quant = quantile(predicted_return,c(.1,.90),na.rm = T)
+  df_great = df[predicted_return >= quant[2],]
+  df_less = df[predicted_return <= quant[1],]
+  return = mean(na.omit(df_great$x.true_return)) - mean(na.omit(df_less$x.true_return))
+  return_list = c(return_list,return)
+}
+```
+
+```{r}
+RSS
+```
+
+```{r}
+cumulative_return = c()
+for(i in 1:length(return_list)){
+   if(i == 1){
+    cumulative_return = c(cumulative_return,return_list[1])
+  }else{
+    cret = ((return_list[i]/100+1)*(1+cumulative_return[i-1]/100)-1)*100
+    cumulative_return = c(cumulative_return,cret)
+  }
+}
+cumulative_return[155]
+```
+```{r}
+sharpe_ratio = (mean(return_list)/sd(return_list))*sqrt(12)
+sharpe_ratio
+```
+```{r}
+plot(cumulative_return,type = "o")
+past_highest = c()
+drawdown = c()
+for(i in 1:length(cumulative_return)){
+  if(cumulative_return[i] < 0){
+    past_highest = c(past_highest,0)
+  }
+  if(cumulative_return[i] >0){
+    if(cumulative_return[i] > cumulative_return[i-1]){
+      past_highest = c(past_highest,cumulative_return[i])
+    }
+    else{
+      past_highest = c(past_highest,cumulative_return[i-1])
+    }
+  }
+}
+for(i in 1:length(cumulative_return)){
+  dd = ((1+cumulative_return[i]/100)/(1+past_highest[i]/100)-1)*100
+  drawdown = c(drawdown,dd)
+}
+max(abs(drawdown))
+```
+
+## fama mac_beth on net income
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$niq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_series = coeff_list[-toDelete]
+t.test(coeff_series,alternative = "greater")
+```
+
+```{r}
+beta = mean(coeff_series)
+to_delete = seq(2,length(coeff_list),2)
+intercept_list = coeff_list[-to_delete]
+intercept = mean(intercept_list)
+beta
+intercept
+```
+
+```{r}
+beta = mean(coeff_series)
+to_delete = seq(2,length(coeff_list),2)
+intercept_list = coeff_list[-to_delete]
+intercept = mean(intercept_list)
+return_list = c()
+RSS = 0
+for(i in 1:155){
+  next_return = return_series %>% filter(date == time_series[i+1])
+  current_data = financial_data %>% filter(datadate == time_series[i])
+  ticker_list = c()
+  true_return = c()
+  predicted_return = c()
+  for(j in 1:length(current_data$LPERMNO)){
+    if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+      index = match(current_data$LPERMNO[j],next_return$PERMNO)
+      ticker_list = c(ticker_list,current_data$ibq[j])
+      true_return = c(true_return,next_return$RET[index])
+      predicted_value = current_data$niq[j]*beta + intercept
+      predicted_return = c(predicted_return,predicted_value)
+      if(!is.na(predicted_value)){
+        RSS = RSS + abs((predicted_value^2 - (next_return$RET[index])^2))
+      }
+    }
+  }
+  df = cbind(ticker_list,predicted_return,true_return)
+  df = data.frame(x = df)
+  quant = quantile(predicted_return,c(.1,.90),na.rm = T)
+  df_great = df[predicted_return >= quant[2],]
+  df_less = df[predicted_return <= quant[1],]
+  return = mean(na.omit(df_great$x.true_return)) - mean(na.omit(df_less$x.true_return))
+  return_list = c(return_list,return)
+}
+cumulative_return = c()
+for(i in 1:length(return_list)){
+   if(i == 1){
+    cumulative_return = c(cumulative_return,return_list[1])
+  }else{
+    cret = ((return_list[i]/100+1)*(1+cumulative_return[i-1]/100)-1)*100
+    cumulative_return = c(cumulative_return,cret)
+  }
+}
+cumulative_return[155]
+```
+```{r}
+RSS
+```
+
+```{r}
+sharpe_ratio = (mean(return_list)/sd(return_list))*sqrt(12)
+sharpe_ratio
+```
+```{r}
+plot(cumulative_return,type = "o")
+past_highest = c()
+drawdown = c()
+for(i in 1:length(cumulative_return)){
+  if(cumulative_return[i] < 0){
+    past_highest = c(past_highest,0)
+  }
+  if(cumulative_return[i] >0){
+    if(cumulative_return[i] > cumulative_return[i-1]){
+      past_highest = c(past_highest,cumulative_return[i])
+    }
+    else{
+      past_highest = c(past_highest,cumulative_return[i-1])
+    }
+  }
+}
+for(i in 1:length(cumulative_return)){
+  dd = ((1+cumulative_return[i]/100)/(1+past_highest[i]/100)-1)*100
+  drawdown = c(drawdown,dd)
+}
+min(drawdown)
+```
+
+## fama mac_beth on operation income after depreciation
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$oiadpq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_series = coeff_list[-toDelete]
+t.test(coeff_series,alternative = "greater")
+```
+```{r}
+beta = mean(coeff_series)
+to_delete = seq(2,length(coeff_list),2)
+intercept_list = coeff_list[-to_delete]
+intercept = mean(intercept_list)
+beta
+intercept
+```
+
+most significant factor that is positively correlated
+
+```{r}
+beta = mean(coeff_series)
+to_delete = seq(2,length(coeff_list),2)
+intercept_list = coeff_list[-to_delete]
+intercept = mean(intercept_list)
+return_list = c()
+RSS = 0
+for(i in 1:155){
+  next_return = return_series %>% filter(date == time_series[i+1])
+  current_data = financial_data %>% filter(datadate == time_series[i])
+  ticker_list = c()
+  true_return = c()
+  predicted_return = c()
+  for(j in 1:length(current_data$LPERMNO)){
+    if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+      index = match(current_data$LPERMNO[j],next_return$PERMNO)
+      ticker_list = c(ticker_list,current_data$ibq[j])
+      true_return = c(true_return,next_return$RET[index])
+      predicted_value = current_data$oiadpq[j]*beta + intercept
+      predicted_return = c(predicted_return,predicted_value)
+      if(!is.na(predicted_value)){
+        RSS = RSS + abs((predicted_value^2 - (next_return$RET[index])^2))
+      }
+    }
+  }
+  df = cbind(ticker_list,predicted_return,true_return)
+  df = data.frame(x = df)
+  quant = quantile(predicted_return,c(.1,.90),na.rm = T)
+  df_great = df[predicted_return >= quant[2],]
+  df_less = df[predicted_return <= quant[1],]
+  return = mean(na.omit(df_great$x.true_return)) - mean(na.omit(df_less$x.true_return))
+  return_list = c(return_list,return)
+}
+cumulative_return = c()
+for(i in 1:length(return_list)){
+   if(i == 1){
+    cumulative_return = c(cumulative_return,return_list[1])
+  }else{
+    cret = ((return_list[i]/100+1)*(1+cumulative_return[i-1]/100)-1)*100
+    cumulative_return = c(cumulative_return,cret)
+  }
+}
+cumulative_return[155]
+```
+```{r}
+RSS
+```
+
+```{r}
+sharpe_ratio = (mean(return_list)/sd(return_list))*sqrt(12)
+sharpe_ratio
+```
+```{r}
+plot(cumulative_return,type = "o")
+past_highest = c()
+drawdown = c()
+for(i in 2:length(cumulative_return)){
+  if(cumulative_return[i] < 0){
+    past_highest = c(past_highest,0)
+  }
+  if(cumulative_return[i] >0){
+    if(cumulative_return[i] > cumulative_return[i-1]){
+      past_highest = c(past_highest,cumulative_return[i])
+    }
+    else{
+      past_highest = c(past_highest,cumulative_return[i-1])
+    }
+  }
+}
+for(i in 1:length(cumulative_return)){
+  dd = ((1+cumulative_return[i]/100)/(1+past_highest[i]/100)-1)*100
+  drawdown = c(drawdown,dd)
+}
+min(drawdown[1:154])
+```
+
+
+## fama mac_beth on income taxed payable
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$txpq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_list = coeff_list[-toDelete]
+t.test(coeff_list,alternative = "greater")
+```
+tend to be negatively correlative but insignificant?
+
+
+## difference between acomnic and cogs
+```{r}
+coeff_list = c()
+for(i in 1:155){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  factor_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      factor_series = c(factor_series,financial_current$difference[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = data.frame(x = factor_series,y = future_return_series)
+  linear_mod = lm(y~x,data = model)
+  coeff = linear_mod$coefficients
+  coeff_list = c(coeff_list,coeff)
+}
+#coeff_list
+toDelete = seq(1,length(coeff_list),2)
+coeff_list = coeff_list[-toDelete]
+t.test(coeff_list,alternative = "less")
+```
+tend to be negatively correlated
+
+```{r}
+time_series
+```
+## best subset selection
+```{r}
+factors = c("ibq","niq","oiadpq")
+residual_list = c()
+subset1_coeff = c()
+subset2_coeff = c()
+subset3_coeff = c()
+subset4_coeff = c()
+for( i in 1:4){
+  if(i == 1){## ibq and niq
+    for(i in 1:155){
+      return_next_month = return_series %>% filter(date == time_series[i+1])
+      financial_current = financial_data %>% filter(datadate == time_series[i])
+      financial_current = financial_current[order(financial_current$LPERMNO),]
+      factor_1_series = c()
+      factor_2_series = c()
+      future_return_series = c()
+      for(j in 1:length(financial_current$LPERMNO)){
+        if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+          pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+          factor_1_series = c(factor_1_series,financial_current$ibq[j])
+          factor_2_series = c(factor_2_series,financial_current$niq[j])
+          future_return_series = c(future_return_series,return_next_month$RET[pos])
+        }
+      }
+        model = data.frame(x1 = factor_1_series,x2 = factor_2_series,y = future_return_series)
+        linear_mod = lm(y~.,data = model)
+        coeff = linear_mod$coefficients
+        subset1_coeff = c(subset1_coeff,coeff)
+    }
+    get_intercept = seq(1,length(subset1_coeff),3)
+    get_beta1 = seq(2,length(subset1_coeff),3)
+    get_beta2 = seq(3,length(subset1_coeff),3)
+    intercept_series = subset1_coeff[get_intercept]
+    beta1_series = subset1_coeff[get_beta1]
+    beta2_series = subset1_coeff[get_beta2]
+    intercept = mean(intercept_series)
+    beta1 = mean(beta1_series)
+    beta2 = mean(beta2_series)
+    RSS = 0
+    for(i in 1:155){
+       next_return = return_series %>% filter(date == time_series[i+1])
+       current_data = financial_data %>% filter(datadate == time_series[i])
+       ticker_list = c()
+       true_return = c()
+       predicted_return = c()
+       for(j in 1:length(current_data$LPERMNO)){
+         if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+           index = match(current_data$LPERMNO[j],next_return$PERMNO)
+           ticker_list = c(ticker_list,current_data$ibq[j])
+           true_return = c(true_return,next_return$RET[index])
+           predicted_value = current_data$ibq[j]*beta1 +current_data$niq[j]*beta2+ intercept
+           predicted_return = c(predicted_return,predicted_value)
+           if(!is.na(predicted_value)){
+            RSS = RSS + abs(predicted_value^2 - (next_return$RET[index])^2)
+           }
+         }
+       }
+    }
+    residual_list = c(residual_list,RSS)
+  }
+  if(i == 2){
+    for(i in 1:155){
+      return_next_month = return_series %>% filter(date == time_series[i+1])
+      financial_current = financial_data %>% filter(datadate == time_series[i])
+      financial_current = financial_current[order(financial_current$LPERMNO),]
+      factor_1_series = c()
+      factor_2_series = c()
+      future_return_series = c()
+      for(j in 1:length(financial_current$LPERMNO)){
+        if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+          pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+          factor_1_series = c(factor_1_series,financial_current$ibq[j])
+          factor_2_series = c(factor_2_series,financial_current$oiadpq[j])
+          future_return_series = c(future_return_series,return_next_month$RET[pos])
+        }
+      }
+        model = data.frame(x1 = factor_1_series,x2 = factor_2_series,y = future_return_series)
+        linear_mod = lm(y~.,data = model)
+        coeff = linear_mod$coefficients
+        subset2_coeff = c(subset2_coeff,coeff)
+    }
+    get_intercept = seq(1,length(subset2_coeff),3)
+    get_beta1 = seq(2,length(subset2_coeff),3)
+    get_beta2 = seq(3,length(subset2_coeff),3)
+    intercept_series = subset1_coeff[get_intercept]
+    beta1_series = subset2_coeff[get_beta1]
+    beta2_series = subset2_coeff[get_beta2]
+    intercept = mean(intercept_series)
+    beta1 = mean(beta1_series)
+    beta2 = mean(beta2_series)
+    RSS = 0
+    for(i in 1:155){
+       next_return = return_series %>% filter(date == time_series[i+1])
+       current_data = financial_data %>% filter(datadate == time_series[i])
+       ticker_list = c()
+       true_return = c()
+       predicted_return = c()
+       for(j in 1:length(current_data$LPERMNO)){
+         if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+           index = match(current_data$LPERMNO[j],next_return$PERMNO)
+           ticker_list = c(ticker_list,current_data$ibq[j])
+           true_return = c(true_return,next_return$RET[index])
+           predicted_value = current_data$ibq[j]*beta1 +current_data$niq[j]*beta2+ intercept
+           predicted_return = c(predicted_return,predicted_value)
+           if(!is.na(predicted_value)){
+            RSS = RSS + abs(predicted_value^2 - (next_return$RET[index])^2)
+           }
+         }
+       }
+    }
+    residual_list = c(residual_list,RSS)
+  }
+  if(i == 3){
+    for(i in 1:155){
+      return_next_month = return_series %>% filter(date == time_series[i+1])
+      financial_current = financial_data %>% filter(datadate == time_series[i])
+      financial_current = financial_current[order(financial_current$LPERMNO),]
+      factor_1_series = c()
+      factor_2_series = c()
+      future_return_series = c()
+      for(j in 1:length(financial_current$LPERMNO)){
+        if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+          pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+          factor_1_series = c(factor_1_series,financial_current$niq[j])
+          factor_2_series = c(factor_2_series,financial_current$oiadpq[j])
+          future_return_series = c(future_return_series,return_next_month$RET[pos])
+        }
+      }
+        model = data.frame(x1 = factor_1_series,x2 = factor_2_series,y = future_return_series)
+        linear_mod = lm(y~.,data = model)
+        coeff = linear_mod$coefficients
+        subset3_coeff = c(subset3_coeff,coeff)
+    }
+    get_intercept = seq(1,length(subset3_coeff),3)
+    get_beta1 = seq(2,length(subset3_coeff),3)
+    get_beta2 = seq(3,length(subset3_coeff),3)
+    intercept_series = subset3_coeff[get_intercept]
+    beta1_series = subset3_coeff[get_beta1]
+    beta2_series = subset3_coeff[get_beta2]
+    intercept = mean(intercept_series)
+    beta1 = mean(beta1_series)
+    beta2 = mean(beta2_series)
+    RSS = 0
+    for(i in 1:155){
+       next_return = return_series %>% filter(date == time_series[i+1])
+       current_data = financial_data %>% filter(datadate == time_series[i])
+       ticker_list = c()
+       true_return = c()
+       predicted_return = c()
+       for(j in 1:length(current_data$LPERMNO)){
+         if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+           index = match(current_data$LPERMNO[j],next_return$PERMNO)
+           ticker_list = c(ticker_list,current_data$ibq[j])
+           true_return = c(true_return,next_return$RET[index])
+           predicted_value = current_data$ibq[j]*beta1 +current_data$niq[j]*beta2+ intercept
+           predicted_return = c(predicted_return,predicted_value)
+           if(!is.na(predicted_value)){
+            RSS = RSS + abs(predicted_value^2 - (next_return$RET[index])^2)
+           }
+         }
+       }
+    }
+    residual_list = c(residual_list,RSS)
+  }
+  if(i == 4){
+    for(i in 1:155){
+      return_next_month = return_series %>% filter(date == time_series[i+1])
+      financial_current = financial_data %>% filter(datadate == time_series[i])
+      financial_current = financial_current[order(financial_current$LPERMNO),]
+      factor_1_series = c()
+      factor_2_series = c()
+      factor_3_series = c()
+      future_return_series = c()
+      for(j in 1:length(financial_current$LPERMNO)){
+        if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+          pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+          factor_1_series = c(factor_1_series,financial_current$niq[j])
+          factor_2_series = c(factor_2_series,financial_current$oiadpq[j])
+          factor_3_series = c(factor_3_series,financial_current$ibq[j])
+          future_return_series = c(future_return_series,return_next_month$RET[pos])
+        }
+      }
+        model = data.frame(x1 = factor_1_series,x2 = factor_2_series,x3 = factor_3_series,y = future_return_series)
+        linear_mod = lm(y~.,data = model)
+        coeff = linear_mod$coefficients
+        subset4_coeff = c(subset4_coeff,coeff)
+    }
+    get_intercept = seq(1,length(subset4_coeff),4)
+    get_beta1 = seq(2,length(subset4_coeff),4)
+    get_beta2 = seq(3,length(subset4_coeff),4)
+    get_beta3 = seq(4,length(subset4_coeff),4)
+    intercept_series = subset4_coeff[get_intercept]
+    beta1_series = subset4_coeff[get_beta1]
+    beta2_series = subset4_coeff[get_beta2]
+    beta3_series = subset4_coeff[get_beta3]
+    intercept = mean(intercept_series)
+    beta1 = mean(beta1_series)
+    beta2 = mean(beta2_series)
+    beta3 = mean(beta3_series)
+    RSS = 0
+    for(i in 1:155){
+       next_return = return_series %>% filter(date == time_series[i+1])
+       current_data = financial_data %>% filter(datadate == time_series[i])
+       ticker_list = c()
+       true_return = c()
+       predicted_return = c()
+       for(j in 1:length(current_data$LPERMNO)){
+         if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+           index = match(current_data$LPERMNO[j],next_return$PERMNO)
+           ticker_list = c(ticker_list,current_data$ibq[j])
+           true_return = c(true_return,next_return$RET[index])
+           predicted_value = current_data$niq[j]*beta1 +current_data$oiadpq[j]*beta2 + current_data$ibq[j]*beta3+ intercept
+           predicted_return = c(predicted_return,predicted_value)
+           if(!is.na(predicted_value)){
+            RSS = RSS + abs(predicted_value^2 - (next_return$RET[index])^2)
+           }
+         }
+       }
+    }
+    residual_list = c(residual_list,RSS)
+  }
+}
+```
+
+```{r}
+residual_list
+```
+By the best subset algorithm, we can tell niq+opadpq is the best
+
+## result 
+```{r}
+return_list = c()
+for(i in 1:155){
+  next_return = return_series %>% filter(date == time_series[i+1])
+  current_data = financial_data %>% filter(datadate == time_series[i])
+  ticker_list = c()
+  true_return = c()
+  predicted_return = c()
+  for(j in 1:length(current_data$LPERMNO)){
+    if(current_data$LPERMNO[j] %in% next_return$PERMNO){
+      index = match(current_data$LPERMNO[j],next_return$PERMNO)
+      ticker_list = c(ticker_list,current_data$ibq[j])
+      true_return = c(true_return,next_return$RET[index])
+      predicted_value = current_data$niq[j]*beta1 +current_data$oiadpq[j]*beta2+ intercept
+      predicted_return = c(predicted_return,predicted_value)
+    }
+  }
+  df = cbind(ticker_list,predicted_return,true_return)
+  df = data.frame(x = df)
+  quant = quantile(predicted_return,c(.1,.90),na.rm = T)
+  df_great = df[predicted_return >= quant[2],]
+  df_less = df[predicted_return <= quant[1],]
+  return = mean(na.omit(df_great$x.true_return)) - mean(na.omit(df_less$x.true_return))
+  return_list = c(return_list,return)
+}
+```
+
+```{r}
+cumulative_return = c()
+for(i in 1:length(return_list)){
+   if(i == 1){
+    cumulative_return = c(cumulative_return,return_list[1])
+  }else{
+    cret = ((return_list[i]/100+1)*(1+cumulative_return[i-1]/100)-1)*100
+    cumulative_return = c(cumulative_return,cret)
+  }
+}
+cumulative_return[155]
+```
+
+```{r}
+sharpe_ratio = (mean(return_list)/sd(return_list))*sqrt(12)
+sharpe_ratio
+```
+```{r}
+library(glmnet)
+```
+
+## ridge and lasso
+```{r}
+coeff_list = c()
+for(i in 1:150){
+  return_next_month = return_series %>% filter(date == time_series[i+1])
+  financial_current = financial_data %>% filter(datadate == time_series[i])
+  financial_current = financial_current[order(financial_current$LPERMNO),]
+  niq_series = c()
+  ibq_series = c()
+  oiadpq_series = c()
+  future_return_series = c()
+  for(j in 1:length(financial_current$LPERMNO)){
+    if(financial_current$LPERMNO[j] %in% return_next_month$PERMNO){
+      pos = match(financial_current$LPERMNO[j],return_next_month$PERMNO)
+      niq_series = c(niq_series,financial_current$niq[j])
+      ibq_series = c(ibq_series,financial_current$ibq[j])
+      oiadpq_series = c(oiadpq_series,financial_current$oiadpq[j])
+      future_return_series = c(future_return_series,return_next_month$RET[pos])
+    }
+  }
+  model = cbind(niq_series,ibq_series,oiadpq_series,future_return_series)
+  new_model = model[complete.cases(model),]
+  lasso_cv = cv.glmnet(x = new_model[,1:3],y = new_model[,4],alpha = 1)
+  ridge_cv = cv.glmnet(x = new_model[,1:3],y = new_model[,4],alpha = 0)
+  lasso_mod = glmnet(x = new_model[,1:3],y = new_model[,4],alpha= 1,lambda = lasso_cv$lambda.min)
+  ridge_mod = glmnet(x = new_model[,1:3],y = new_model[,4],alpha= 0,lambda = ridge_cv$lambda.min)
+}
+```
+
+```{r}
+coef(ridge_mod)
+coef(lasso_mod)
+```
+```{r}
+```
+
+
+
